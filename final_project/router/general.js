@@ -20,8 +20,10 @@ const doesExist = (username) => {
 
 public_users.post("/register", (req,res) => {
   //Write your code here
+  console.log(req);
   const username = req.body.username;
   const password = req.body.password;
+  console.log(username,password);
     if (username && password) {
         // Check if the user does not already exist
         if (!doesExist(username)) {
@@ -32,6 +34,7 @@ public_users.post("/register", (req,res) => {
             return res.status(404).json({message: "User already exists!"});
         }
     }
+  return res.status(400).json({message:"Bad Request. Username or password missing"});
 });
 
 // Get the book list available in the shop
