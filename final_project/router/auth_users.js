@@ -48,18 +48,30 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     const review = req.body.review
     const isbn = req.params.isbn
     const book = books[isbn]
-    console.log("review ",review)
-    console.log("book: ",book);
-    console.log("req.user: ",req.user)
+    const {username} = req.session.authorization || {}
     if(review){
-        book.review = {
-            "user": req.user,
-            "review":review
+        if(!book.reviews[username]){
+            book.reviews[username] = review;
+            return res.status(202).json({message: "Book Review updated for user: "+req.user.data+" review: "+review});
+        }else{
+            book.reviews[username] = review
+            return res.status(202).json({message: "Book Review Added for user: "+req.user.data+" review: "+review});
         }
-    }
-    
-  return res.status(200).json({message: "Book Review Added"});
+    }else{
+        return res.status(401).json({message: "Bad Request.Review not provided"})
+    }  
 });
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const {username} = req.session.authorization;
+    const book = books[req.params.isbn]
+    if(book.reviews[username]){
+        book.reviews[username] = '';
+        return res.status(200).json({message: "Review delete for user "+username})
+    }else{
+        return res.status(401).json({message: "User review does not exists"});
+    }
+})
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;

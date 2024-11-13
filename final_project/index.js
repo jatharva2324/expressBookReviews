@@ -11,6 +11,7 @@ app.use(express.json());
 app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
 
 app.use("/customer/auth/*", function auth(req,res,next){
+    console.log("in app.use customer auth")
 //Write the authenication mechanism here
     if(req.session.authorization){
         let token = req.session.authorization['accessToken'];
@@ -28,7 +29,7 @@ app.use("/customer/auth/*", function auth(req,res,next){
     
 });
  
-const PORT =5000;
+const PORT =5001;
 
 app.use("/customer", customer_routes);
 app.use("/", genl_routes);

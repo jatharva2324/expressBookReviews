@@ -20,10 +20,8 @@ const doesExist = (username) => {
 
 public_users.post("/register", (req,res) => {
   //Write your code here
-  console.log(req);
   const username = req.body.username;
   const password = req.body.password;
-  console.log(username,password);
     if (username && password) {
         // Check if the user does not already exist
         if (!doesExist(username)) {
@@ -37,31 +35,53 @@ public_users.post("/register", (req,res) => {
   return res.status(400).json({message:"Bad Request. Username or password missing"});
 });
 
+let fetchBooksPromise = new Promise((resolve,reject)=>{
+    if(books && Object.keys(books).length > 0){
+        resolve(books)
+    }else{
+        reject("No books")
+    }
+})
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
   //Write your code here
-  res.send(JSON.stringify(books))
+  fetchBooksPromise.then((books)=>{
+      res.send(JSON.stringify(books))
+  }).catch((err)=>{
+    console.log(err)
+  })
 });
+
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
   //Write your code here
   const isbn = req.params.isbn
-  const book = books[isbn]
-  res.send(JSON.stringify(book))
+  fetchBooksPromise.then((books)=>{
+    const book = books[isbn]
+    res.send(JSON.stringify(book))
+    }).catch((err)=>{
+        console.log(err)
+    })
+  
  });
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
   //Write your code here
   const author = req.params.author;
-  const length = Object.keys(books).length;
-  for(var i=1;i<=length;i++){
-    var book = books[i]
-    if(book.author === author){
-        return res.status(200).json(book)
+  fetchBooksPromise.then((books)=>{
+    const length = Object.keys(books).length;
+    for(var i=1;i<=length;i++){
+        var book = books[i]
+        if(book.author === author){
+            return res.status(200).json(book)
+        }
     }
-  }
+    }).catch((err)=>{
+        console.log(err)
+    })
+  
   //return res.status(300).json({message: "Yet to be implemented"});
 });
 
@@ -69,13 +89,18 @@ public_users.get('/author/:author',function (req, res) {
 public_users.get('/title/:title',function (req, res) {
   //Write your code here
   const title = req.params.title;
-  const length = Object.keys(books).length;
-  for(var i=1;i<=length;i++){
-    var book = books[i]
-    if(book.title === title){
-        return res.status(200).json(book)
-    }
-  }
+  fetchBooksPromise.then((books)=>{
+        const length = Object.keys(books).length;
+        for(var i=1;i<=length;i++){
+            var book = books[i]
+            if(book.title === title){
+                return res.status(200).json(book)
+            }
+        }
+    }).catch((err)=>{
+        console.log(err)
+    })
+  
 });
 
 //  Get book review
